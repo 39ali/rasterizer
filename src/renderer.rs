@@ -36,12 +36,17 @@ impl Renderer{
             y = y.round();
             self.framebuffer.put_pixel(x as usize, y as usize,color )
         }
-        println!("{:?}", color);
     }
+
+    //TODO:make this faster
     pub fn present(&mut self){
        self.sdl.put_framebuffer_in_canvas(&mut self.canvas,&self.framebuffer);
     }
 
+    pub fn clear( &mut self){
+
+      self.framebuffer.clear();
+    }
 
     pub fn get_sdl_context(&self)->&SdlHelper{
        &self. sdl

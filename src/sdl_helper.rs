@@ -55,7 +55,6 @@ pub fn put_framebuffer_in_canvas(&self,canvas:&mut Canvas<Window> , frame:&Frame
 
     let mut texture = texture_creator.create_texture_streaming(PixelFormatEnum::RGBA8888, frame.width as u32, frame.height as u32).unwrap();
         
-    // Create a red-green gradient
     texture.with_lock(None, |buffer: &mut [u8], pitch: usize| {
         for y in 0..frame.height {
             for x in 0..frame.width {

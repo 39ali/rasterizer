@@ -26,15 +26,68 @@ impl Renderer{
         Renderer{canvas , sdl,framebuffer}
     }
 
-    pub fn draw_line (&mut self,start:Vector2<u32> , end:Vector2<u32>,color: Color){
+    pub fn draw_line (&mut self,start:Vector2<f32> , end:Vector2<f32>,color: Color){
         // y = mx+c 
-        let m =(( end.y - start.y) as f32 )/(end.x -start.x) as f32;
-        let c = (start.y as f32) -m*(start.x as f32);
 
-        for x in start.x..end.x {
-            let mut y = m*(x as f32) +c;
-            y = y.round();
-            self.framebuffer.put_pixel(x as usize, y as usize,color )
+        let dx = end.x - start.x;
+        let dy = end.y-start.y;
+        let mut x1 = start.x;
+        let mut x2 = end.x;
+        let mut y1 = start.y;
+        let mut y2 =end.y;
+        if dx ==0.0 && dy==0.0 {
+        self.framebuffer.put_pixel(start.x as usize, start.y as usize,color );
+        }
+        else if  dy.abs() > dx.abs() {
+            
+            if dy<0.0{
+            std::mem::swap(&mut x1, &mut x2);
+            std::mem::swap(&mut y1, &mut y2);
+            }
+
+            let m = dx/dy;
+            let mut y=y1;
+            let mut last_int_y = 0;
+            let mut x;
+            loop {
+                x= x1;
+                if y>=y2{
+                    break;
+                }
+                y+=1.0;
+                x+=m;
+                last_int_y= y.trunc() as i32;  
+             self.framebuffer.put_pixel(x as usize, last_int_y as usize,color )
+            }
+
+            if y2.trunc() as i32 >last_int_y{   
+             self.framebuffer.put_pixel(x2 as usize, y2 as usize,color )
+            }
+        }
+        else {
+            if dx<0.0{
+                std::mem::swap(&mut x1, &mut x2);
+                std::mem::swap(&mut y1, &mut y2);
+                }
+    
+                let m = dy/dx;
+                let mut x=x1;
+                let mut last_int_x = 0;
+                let mut y;
+                loop {
+                    y= y1;
+                    if x>=x2{
+                        break;
+                    }
+                    x+=1.0;
+                    y+=m;
+                    last_int_x= x.trunc() as i32;  
+                 self.framebuffer.put_pixel(last_int_x as usize, y as usize,color )
+                }
+    
+                if x2.trunc() as i32 >last_int_x{   
+                 self.framebuffer.put_pixel(x2 as usize, y2 as usize,color )
+                }
         }
     }
 
@@ -48,6 +101,9 @@ impl Renderer{
       self.framebuffer.clear();
     }
 
+    pub  fn set_clear_color (&mut self, color:Color ){
+        self.framebuffer.set_clear_color(color);
+    }
     pub fn get_sdl_context(&self)->&SdlHelper{
        &self. sdl
     }

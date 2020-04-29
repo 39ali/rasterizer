@@ -14,12 +14,12 @@ pub struct FrameBuffer{
 impl FrameBuffer{
     pub fn new (width:usize, height:usize)-> Self{
 
-        let _clear_col:Color = Color::RGB(255,255,255);
+        let _clear_col:Color = Color::RGB(0,0,0);
         let pixels = vec![_clear_col;width*height];
         FrameBuffer{
             pixels,
             width,
-            clear_color:Color::RGB(255,255,255),
+            clear_color:Color::RGB(0,0,0),
             height
            
         }

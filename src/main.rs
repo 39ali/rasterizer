@@ -15,6 +15,7 @@ use std::time::Instant;
 use cube::*;
 use transformers::*;
 use defs::*;
+use cgmath::*;
 pub fn main() -> Result<(), String> {
     let screen_width:u32 = 620;
     let screen_height:u32=620;
@@ -23,7 +24,9 @@ pub fn main() -> Result<(), String> {
     let sdl_context = renderer.get_sdl_context().sdl_context();
     let mut event_pump = sdl_context.event_pump()?;
     let mut delta: u128 = 0;
-    let cube :Cube = Cube::new(1.0);
+    let mut theta_z = 0.0;
+    
+    let cube :Cube = Cube::new(0.5);
     'running: loop {
         for event in event_pump.poll_iter() {
             match event {
@@ -40,9 +43,18 @@ pub fn main() -> Result<(), String> {
         renderer.clear();
         let cube_buffer = cube.get_index_buffer();
         let mut transformed_vertices:Vec<Vec3f>= Vec::with_capacity(cube_buffer.vertices.len());
+        theta_z=wrap_angle(theta_z+ std::f32::consts::PI/60.0);
+      //  Matrix4::from(ortho(0.0, 0.0, 0.0, 0.0, 0.0, 0.0));
+        let rot:Matrix4<f32>=Matrix4::from_angle_x(Rad(theta_z))
+        *Matrix4::from_angle_y(Rad(theta_z))
+        *Matrix4::from_angle_z(Rad(theta_z));
+         
         for v in cube_buffer.vertices.iter() {
-           let transformed_v= ndc_to_screen_space(v, screen_width, screen_height);
-            transformed_vertices.push(transformed_v);
+             let mut  transformed_v  =*v;
+             transformed_v = rot.transform_vector(transformed_v);
+                transformed_v.z+=2.0;
+            let  sp_v= ndc_to_screen_space(&transformed_v, screen_width, screen_height);
+            transformed_vertices.push(sp_v);
         }
 
         let mut indecies_iter = cube_buffer.indices.iter();
@@ -52,6 +64,7 @@ pub fn main() -> Result<(), String> {
                let index2= indecies_iter.next().unwrap();
                let start = transformed_vertices[*index1];
                let end = transformed_vertices[*index2];
+               println!("{:?},{:?}",start,end);
                renderer.draw_line(start.xy(), end.xy(), Color::RGB(255, 255, 255));
             },
               None=>{break;}
@@ -76,4 +89,10 @@ pub fn main() -> Result<(), String> {
     }
 
     Ok(())
+}
+
+
+pub fn rot<R: Rotation3<f32>>(deg:f32) -> R {
+    let axis = Vector3::new(0.0, 0.0, 1.0).normalize();
+    Rotation3::from_axis_angle(axis, Deg(deg))
 }

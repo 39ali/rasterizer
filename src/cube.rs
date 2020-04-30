@@ -17,7 +17,7 @@ impl Cube {
         vertices.push(Vec3f::new(face,face,-face));
         vertices.push(Vec3f::new(-face,-face,face));
         vertices.push(Vec3f::new(face,-face,face));
-        vertices.push(Vec3f::new(face,face,-face));
+        vertices.push(Vec3f::new(-face,face,face));
         vertices.push(Vec3f::new(face,face,face));
 
 

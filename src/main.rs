@@ -16,6 +16,13 @@ use cube::*;
 use transformers::*;
 use defs::*;
 use cgmath::*;
+
+
+
+extern crate rand;
+
+use rand::Rng;
+
 pub fn main() -> Result<(), String> {
     let screen_width:u32 = 620;
     let screen_height:u32=620;
@@ -25,8 +32,17 @@ pub fn main() -> Result<(), String> {
     let mut event_pump = sdl_context.event_pump()?;
     let mut delta: u128 = 0;
     let mut theta_z = 0.0;
+
+    let mut rng = rand::thread_rng();
+    let mut  random_colors :Vec<Color> = Vec::with_capacity(12);
     
+   for _ in 0..12{
+       random_colors.push(Color::RGB(rng.gen(),rng.gen(),rng.gen()));
+   }
+    
+
     let cube :Cube = Cube::new(0.5);
+
     'running: loop {
         for event in event_pump.poll_iter() {
             match event {
@@ -41,31 +57,38 @@ pub fn main() -> Result<(), String> {
 
         let before = Instant::now();
         renderer.clear();
-        let cube_buffer = cube.get_index_buffer();
+        let cube_buffer = cube.get_indexed_buffer();
+       
+
+
         let mut transformed_vertices:Vec<Vec3f>= Vec::with_capacity(cube_buffer.vertices.len());
         theta_z=wrap_angle(theta_z+ std::f32::consts::PI/60.0);
       //  Matrix4::from(ortho(0.0, 0.0, 0.0, 0.0, 0.0, 0.0));
         let rot:Matrix4<f32>=Matrix4::from_angle_x(Rad(theta_z))
         *Matrix4::from_angle_y(Rad(theta_z))
         *Matrix4::from_angle_z(Rad(theta_z));
-         
         for v in cube_buffer.vertices.iter() {
              let mut  transformed_v  =*v;
              transformed_v = rot.transform_vector(transformed_v);
-                transformed_v.z+=2.0;
+                transformed_v.z+=1.0;
             let  sp_v= ndc_to_screen_space(&transformed_v, screen_width, screen_height);
             transformed_vertices.push(sp_v);
         }
 
         let mut indecies_iter = cube_buffer.indices.iter();
+        let mut i=0;
         loop{
           match indecies_iter.next(){
               Some(index1)=>{
                let index2= indecies_iter.next().unwrap();
-               let start = transformed_vertices[*index1];
-               let end = transformed_vertices[*index2];
-               println!("{:?},{:?}",start,end);
-               renderer.draw_line(start.xy(), end.xy(), Color::RGB(255, 255, 255));
+               let index3= indecies_iter.next().unwrap();
+               let v0 = transformed_vertices[*index1];
+               let v1 = transformed_vertices[*index2];
+               let v2 = transformed_vertices[*index3];
+              // println!("{:?},{:?}",start,end);
+               renderer.draw_trangle(&v0.xy(), &v1.xy(), &v2.xy(), random_colors[i]);
+               i+=1;
+               //renderer.draw_line(&start.xy(), &end.xy(), Color::RGB(255, 255, 255));
             },
               None=>{break;}
           }

@@ -9,3 +9,4 @@ edition = "2018"
 [dependencies]
 sdl2 ={version= "0.33" , features=["bundled" ,"static-link"] }
 cgmath ={version= "0.17.0",features=["swizzle"]}
+rand = "0.7.3"

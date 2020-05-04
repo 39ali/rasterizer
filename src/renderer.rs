@@ -146,4 +146,8 @@ impl Renderer {
     pub fn get_sdl_context(&self) -> &SdlHelper {
         &self.sdl
     }
+
+    pub fn get_size (&self) -> Vec2i{
+        Vec2i::new(self.framebuffer.width as i32,self.framebuffer.height as i32)
+    }
 }

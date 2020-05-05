@@ -1,40 +1,39 @@
-
 use sdl2::event::Event;
+use sdl2::keyboard::Scancode;
 use sdl2::EventPump;
-use sdl2::keyboard::Keycode;
+use std::collections::HashSet;
 pub struct Input {
-_quit:bool,
-_keys_pressed:Vec<bool>
+    quit: bool,
+    keys_pressed: HashSet<Scancode>,
 }
 
 impl Input {
+    pub fn new() -> Self {
+        let keys_pressed = HashSet::new();
 
-    pub fn new()->Self{
-
-        let _keys_pressed = vec![false;2];
-
-        Input{_quit
-            :false,
-        _keys_pressed}
-    }
-pub    fn key_pressed(&self,event_pump:&mut EventPump , _key_pressed:Keycode) -> bool{
-        for event in event_pump.poll_iter() {
-            match event {
-            Event::KeyDown{keycode:Some(_key_pressed),..}=> return true
-            , _=> {}    
+        Input {
+            quit: false,
+            keys_pressed,
         }
-                }
-                false
     }
 
-    pub fn is_quit(&self,event_pump:&mut EventPump) -> bool{
+    pub fn poll_events(&mut self, event_pump: &mut EventPump) {
+        self.keys_pressed.clear();
+        self.quit = false;
         for event in event_pump.poll_iter() {
-            match event {
-                Event::Quit { .. }=> return true
-            , _=> {}    
+            if let Event::Quit { .. } = event {
+                self.quit = true;
+            };
+            if let Event::KeyDown { scancode, .. } = event {
+                self.keys_pressed.insert(scancode.unwrap());
+            }
         }
-                }
-                false
+    }
+    pub fn key_pressed(&self, key: Scancode) -> bool {
+        self.keys_pressed.contains(&key)
     }
 
+    pub fn should_quit(&self) -> bool {
+        self.quit
+    }
 }

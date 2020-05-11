@@ -114,9 +114,10 @@ impl Renderer {
             p.x = min_x;
             while p.x<=max_x {
                 // calcualte the barycentric coordinates
-                let w0 = self.orient2d(&v1, &v2, &p);
-                let w1 = self.orient2d(&v2, &v0, &p);
-                let w2 = self.orient2d(&v0, &v1, &p);
+                let w0 = self.orient2d(&v0, &v1, &p);
+                let w1 = self.orient2d(&v1, &v2, &p);
+                let w2 = self.orient2d(&v2, &v0, &p);
+              
                
                 if w0>=0 &&w1>=0&&w2>=0{
                     self.framebuffer.put_pixel(p.x as usize, p.y as usize, color);

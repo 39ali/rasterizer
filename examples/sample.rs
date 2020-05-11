@@ -22,7 +22,7 @@ struct UserGame {
 impl UserGame {
     pub fn new(screen_width: u32, screen_height: u32) -> Self {
         let mut rng = rand::thread_rng();
-
+ 
         let mut random_colors: Vec<Color> = Vec::with_capacity(12);
 
         for _ in 0..12 {

@@ -89,6 +89,7 @@ impl Renderer {
     }
 
     fn orient2d(&mut self,a: &Vec2i, b: &Vec2i, c: &Vec2i) -> i32 {
+      //  println!("{:?},{:?},{:?}", a,b,c);
         (b.x-a.x)*(c.y-a.y) - (b.y-a.y)*(c.x-a.x)
     }
     //https://www.cs.bgu.ac.il/~graph161/wiki.files/09c-Rasterization.pdf
@@ -97,18 +98,20 @@ impl Renderer {
         let v1 = Vec2i::new (v1.x as i32,v1.y as i32);
         let v2 = Vec2i::new (v2.x as i32,v2.y as i32);
        
+       
         /* triangle bounding box*/
         let mut min_x = v0.x.min(v1.x).min(v2.x);
         let mut min_y = v0.y.min(v1.y).min(v2.y);
         let mut max_x = v0.x.max(v1.x).max(v2.x);
         let mut max_y = v0.y.max(v1.y).max(v2.y);
 
+      
         // clip to screen bounds
         min_x = min_x.max(0);
         min_y = min_y.max(0);
         max_x = max_x.min(self.framebuffer.width as i32 - 1);
         max_y = max_y.min(self.framebuffer.height as i32 -1);
-        
+      
         let mut  p:Vec2i = Vec2i::new(min_x, min_y) ;
         while p.y<=max_y{
             p.x = min_x;
@@ -120,6 +123,7 @@ impl Renderer {
               
                
                 if w0>=0 &&w1>=0&&w2>=0{
+                    //println!("x:{},y:{}",p.x,p.y);
                     self.framebuffer.put_pixel(p.x as usize, p.y as usize, color);
                 }
 

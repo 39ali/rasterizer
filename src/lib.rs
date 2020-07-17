@@ -9,3 +9,4 @@ pub mod cube;
 pub mod defs;
 pub mod indexed_buffer;
 pub mod input;
+pub mod mesh;

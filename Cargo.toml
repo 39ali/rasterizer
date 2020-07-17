@@ -10,3 +10,4 @@ edition = "2018"
 sdl2 ={version= "0.33" , features=["bundled" ,"static-link"] }
 cgmath ={version= "0.17.0",features=["swizzle"]}
 rand = "0.7.3"
+tobj = "2.0.2"

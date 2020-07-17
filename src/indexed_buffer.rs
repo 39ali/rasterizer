@@ -3,7 +3,7 @@ use crate::defs::{Vec3f};
 
 pub struct IndexedBuffer{
   pub  vertices:Vec<Vec3f>,
-    pub indices:Vec<usize>
+  pub indices:Vec<usize>
 }
 
 

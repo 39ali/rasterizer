@@ -1,7 +1,7 @@
 extern crate rand;
 extern crate rasterizer;
 
-use rasterizer::{cube::*, defs::*, input::*, renderer::*, transformers::*};
+use rasterizer::{cube::*, defs::*, input::*, renderer::*, transformers::*,mesh::* };
 
 use cgmath::*;
 use rand::Rng;
@@ -17,6 +17,7 @@ struct UserGame {
     theta_z: f32,
     random_colors: Vec<Color>,
     cube: Cube,
+    mesh:Mesh
 }
 
 impl UserGame {
@@ -32,7 +33,7 @@ impl UserGame {
         let renderer = Renderer::new(screen_width, screen_height, "raster");
         let input = Input::new();
         let cube: Cube = Cube::new(0.5);
-
+        let mesh :Mesh= Mesh::new("C:/Dev/rasterizer/meshes/bunny.obj");
         UserGame {
             renderer,
             input,
@@ -40,13 +41,14 @@ impl UserGame {
             theta_z: 0.0,
             random_colors,
             cube,
+            mesh
         }
     }
 
     pub fn run(&mut self) {
         let sdl_context = self.renderer.get_sdl_context().sdl_context();
         let mut event_pump = sdl_context.event_pump().unwrap();
-
+      
         'game_loop: loop {
             let before = Instant::now();
 
@@ -59,7 +61,9 @@ impl UserGame {
             self.update();
             self.render();
 
+           
             self.print_fps(&before);
+        
         }
     }
 
@@ -68,17 +72,16 @@ impl UserGame {
     fn render(&mut self) {
         self.renderer.clear();
         let cube_buffer = self.cube.get_indexed_buffer();
-
-        let mut transformed_vertices: Vec<Vec3f> = Vec::with_capacity(cube_buffer.vertices.len());
+        
+        let mut transformed_vertices: Vec<Vec3f> = Vec::with_capacity(self.mesh.vertices.len());
         self.theta_z = wrap_angle(self.theta_z + std::f32::consts::PI / 60.0);
         //  Matrix4::from(ortho(0.0, 0.0, 0.0, 0.0, 0.0, 0.0));
-        let rot: Matrix4<f32> = Matrix4::from_angle_x(Rad(self.theta_z))
-            * Matrix4::from_angle_y(Rad(self.theta_z))
-            * Matrix4::from_angle_z(Rad(self.theta_z));
-        for v in cube_buffer.vertices.iter() {
+        let rot: Matrix4<f32> = Matrix4::from_angle_y(Rad(self.theta_z));
+          //  * Matrix4::from_angle_z(Rad(self.theta_z));
+        for v in self.mesh.vertices.iter() {
             let mut transformed_v = *v;
             transformed_v = rot.transform_vector(transformed_v);
-            transformed_v.z += 1.0;
+            transformed_v.z += 3.0;
             let sp_v = ndc_to_screen_space(
                 &transformed_v,
                 self.renderer.get_size().x as u32,
@@ -86,28 +89,38 @@ impl UserGame {
             );
             transformed_vertices.push(sp_v);
         }
-
-        let mut indecies_iter = cube_buffer.indices.iter();
+//println!("ypp {}",transformed_vertices.len());
+        let mut indecies_iter = self.mesh.indices.iter();
+    //   println!("{:?}",indecies_iter);
         let mut i = 0;
-        loop {
-            match indecies_iter.next() {
-                Some(index1) => {
-                    let index2 = indecies_iter.next().unwrap();
-                    let index3 = indecies_iter.next().unwrap();
-                    let v0 = transformed_vertices[*index1];
-                    let v1 = transformed_vertices[*index2];
-                    let v2 = transformed_vertices[*index3];
-                    // println!("{:?},{:?}",start,end);
+       
+            while let Some(index1)=indecies_iter.next() {
+              
+                  
+                    let index2 = indecies_iter.next();
+                    let index3 = indecies_iter.next();
+
+                    if !index2.is_some() || !index3.is_some(){
+                        break
+                    }
+                
+                    let index2 = index2.unwrap();
+                    let index3=index3.unwrap();
+                     // println!("{:?},{:?},{:?}", index1,index2,index3);
+
+                    let v0 = transformed_vertices[*index1 as usize] ;
+                    let v1 = transformed_vertices[*index2 as usize];
+                    let v2 = transformed_vertices[*index3 as usize];
+                   // println!("{:?},{:?}, {:?}",v0,v1,v2);
                     self.renderer
-                        .draw_trangle(&v0.xy(), &v1.xy(), &v2.xy(), self.random_colors[i]);
+                        .draw_trangle(&v0.xy(), &v1.xy(), &v2.xy(), self.random_colors[i%self.random_colors.len()]);
                     i += 1;
+                  //  println!("end");
                     //renderer.draw_line(&start.xy(), &end.xy(), Color::RGB(255, 255, 255));
                 }
-                None => {
-                    break;
-                }
-            }
-        }
+               
+            
+      
 
         self.renderer.present();
     }
@@ -127,7 +140,7 @@ impl UserGame {
 }
 
 pub fn main() {
-    let mut g = UserGame::new(620, 620);
+    let mut g = UserGame::new(600, 600);
     g.run();
 }
 

@@ -1,5 +1,5 @@
 use crate::defs::Vec3f;
-use std::time::{Duration, Instant};
+use std::time::{Instant};
 extern crate tobj;
 pub struct Mesh {
     pub vertices: Vec<Vec3f>,

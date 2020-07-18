@@ -10,3 +10,5 @@ pub mod defs;
 pub mod indexed_buffer;
 pub mod input;
 pub mod mesh;
+pub mod entity;
+pub mod transform;

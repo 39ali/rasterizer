@@ -1,7 +1,7 @@
 use crate::defs::*;
 
 
-pub fn ndc_to_screen_space (ndc:&Vec3f , screen_width:u32 , screen_height:u32)->Vec3f{
+pub fn ndc_to_screen_space (ndc:&Vec4f , screen_width:u32 , screen_height:u32)->Vec3f{
 let  z_inv ; 
 if ndc.z !=0.0 {
 z_inv =1.0/ndc.z;

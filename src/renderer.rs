@@ -3,6 +3,8 @@ use crate::framebuffer::FrameBuffer;
 use crate::sdl_helper::SdlHelper;
 use cgmath::*;
 use sdl2::{pixels::Color, render::Canvas, video::Window};
+use crate::entity::*;
+use crate::transformers::*;
 pub struct Renderer {
     canvas: Canvas<Window>,
     pub sdl: SdlHelper,
@@ -88,12 +90,14 @@ impl Renderer {
         }
     }
 
+    //edge function returns the area of parallelogram formed by two vectors 
     fn orient2d(&mut self,a: &Vec2i, b: &Vec2i, c: &Vec2i) -> i32 {
       //  println!("{:?},{:?},{:?}", a,b,c);
         (b.x-a.x)*(c.y-a.y) - (b.y-a.y)*(c.x-a.x)
     }
     //https://www.cs.bgu.ac.il/~graph161/wiki.files/09c-Rasterization.pdf
-    pub fn draw_trangle(&mut self, v0: &Vec2f, v1: &Vec2f, v2: &Vec2f, color: Color) {
+    //we are drawing in CW order
+    pub fn draw_triangle(&mut self, v0: &Vec2f, v1: &Vec2f, v2: &Vec2f, color: Color) {
         let v0 =Vec2i::new (v0.x as i32,v0.y as i32);
         let v1 = Vec2i::new (v1.x as i32,v1.y as i32);
         let v2 = Vec2i::new (v2.x as i32,v2.y as i32);
@@ -133,6 +137,46 @@ impl Renderer {
 
         }
         
+    }
+
+
+    pub fn draw_entity(&mut self , entity:&Entity){
+
+        let mut transformed_vertices: Vec<Vec3f> = Vec::with_capacity(entity.mesh.vertices.len());
+       
+        for v in entity.mesh.vertices.iter() {
+           let  transformed_v = entity.transform.mat * vec4(v.x, v.y, v.z, 1.0);
+           let sp_v = ndc_to_screen_space(
+                &transformed_v,
+                self.get_size().x as u32,
+                self.get_size().y as u32,
+            );
+            transformed_vertices.push(sp_v);
+        }
+
+        let mut indecies_iter = entity.mesh.indices.iter();
+  
+       
+            while let Some(index1)=indecies_iter.next() {
+              
+                    let index2 = indecies_iter.next();
+                    let index3 = indecies_iter.next();
+
+                    if !index2.is_some() || !index3.is_some(){
+                        break
+                    }
+                
+                    let index2 = index2.unwrap();
+                    let index3=index3.unwrap();
+          
+
+                    let v0 = transformed_vertices[*index1 as usize] ;
+                    let v1 = transformed_vertices[*index2 as usize];
+                    let v2 = transformed_vertices[*index3 as usize];
+                   
+                    self.draw_triangle(&v0.xy(), &v1.xy(), &v2.xy(), Color::RGB(255, 255, 255));
+                }
+               
     }
 
     //TODO:make this faster

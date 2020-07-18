@@ -7,6 +7,12 @@ pub struct SdlHelper {
     sdl_context: Sdl,
 }
 
+impl Default for SdlHelper {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SdlHelper {
     pub fn new() -> Self {
         let sdl_context = sdl2::init().unwrap();
@@ -30,12 +36,10 @@ impl SdlHelper {
             Err(err) => panic!("failed to create window: {}", err),
         };
 
-        let canvas = match window.into_canvas().build() {
+        match window.into_canvas().build() {
             Ok(canvas) => canvas,
             Err(err) => panic!("failed to create renderer: {}", err),
-        };
-
-        return canvas;
+        }
     }
 
     pub fn put_framebuffer_in_canvas(&self, canvas: &mut Canvas<Window>, frame: &FrameBuffer) {

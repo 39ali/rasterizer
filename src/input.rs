@@ -7,8 +7,8 @@ pub struct Input {
     keys_pressed: HashSet<Scancode>,
 }
 
-impl Input {
-    pub fn new() -> Self {
+impl Default for Input {
+    fn default() -> Self {
         let keys_pressed = HashSet::new();
 
         Input {
@@ -16,7 +16,9 @@ impl Input {
             keys_pressed,
         }
     }
+}
 
+impl Input {
     pub fn poll_events(&mut self, event_pump: &mut EventPump) {
         self.keys_pressed.clear();
         self.quit = false;

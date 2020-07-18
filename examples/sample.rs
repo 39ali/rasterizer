@@ -1,7 +1,7 @@
 extern crate rand;
 extern crate rasterizer;
 
-use rasterizer::{input::*, renderer::*,mesh::* , entity::*};
+use rasterizer::{entity::*, input::*, mesh::*, renderer::*};
 
 use cgmath::*;
 use rand::Rng;
@@ -14,13 +14,13 @@ struct UserGame {
     input: Input,
     delta: u128,
     theta_z: f32,
-    entity:Entity
+    entity: Entity,
 }
 
 impl UserGame {
     pub fn new(screen_width: u32, screen_height: u32) -> Self {
         let mut rng = rand::thread_rng();
- 
+
         let mut random_colors: Vec<Color> = Vec::with_capacity(12);
 
         for _ in 0..12 {
@@ -28,24 +28,24 @@ impl UserGame {
         }
 
         let renderer = Renderer::new(screen_width, screen_height, "raster");
-        let input = Input::new();
-        let mesh :Mesh= Mesh::new("C:/Dev/rasterizer/meshes/bunny.obj");
+        let input: Input = Input::default();
+        let mesh: Mesh = Mesh::new("C:/Dev/rasterizer/meshes/bunny.obj");
         let mut entity: Entity = Entity::new(mesh);
-        entity.transform.position.z+=3.0;
+        entity.transform.position.z += 3.0;
         entity.update_transform();
         UserGame {
             renderer,
             input,
             delta: 0,
             theta_z: 0.0,
-            entity
+            entity,
         }
     }
 
     pub fn run(&mut self) {
         let sdl_context = self.renderer.get_sdl_context().sdl_context();
         let mut event_pump = sdl_context.event_pump().unwrap();
-        let mut dt: f32=0.0;
+        let mut dt: f32 = 0.0;
         'game_loop: loop {
             let before = Instant::now();
 
@@ -56,32 +56,28 @@ impl UserGame {
             }
             if self.input.key_pressed(Scancode::A) {}
 
-          
             self.update(dt);
             self.render();
 
-           
             self.print_fps(&before);
-             dt =before.elapsed().as_millis() as f32;
-          
-            
+            dt = before.elapsed().as_millis() as f32;
         }
     }
 
-    fn update(&mut self, dt:f32) {
-        let scale= dt/60.;
-        self.theta_z+=0.3 *scale;
-      
-        self.entity.transform.rotation.y=self.theta_z;
+    fn update(&mut self, dt: f32) {
+        let scale = dt / 60.;
+        self.theta_z += 0.3 * scale;
+
+        self.entity.transform.rotation.y = self.theta_z;
+
+        self.entity.transform.position.x = (self.theta_z).cos() * 2.0;
         self.entity.update_transform();
     }
 
     fn render(&mut self) {
         self.renderer.clear();
- 
+
         self.renderer.draw_entity(&self.entity);
-            
-      
 
         self.renderer.present();
     }

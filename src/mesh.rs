@@ -1,9 +1,11 @@
-use crate::defs::Vec3f;
+use crate::defs::*;
 use std::time::Instant;
 extern crate tobj;
 pub struct Mesh {
     pub vertices: Vec<Vec3f>,
     pub indices: Vec<u32>,
+    pub uvs: Vec<Vec2f>,
+    pub normals: Vec<Vec3f>,
 }
 
 impl Mesh {
@@ -25,11 +27,12 @@ impl Mesh {
 
             println!("model[{}].faces #={}", i, mesh.num_face_indices.len());
             println!("model[{}].indices #={}", i, mesh.num_face_indices.len() * 3);
-
+            
             let mut vertices: Vec<Vec3f> = Vec::with_capacity(mesh.positions.len());
             let mut indices = Vec::with_capacity(mesh.num_face_indices.len() * 3);
 
             let mut next_face = 0;
+            //load indices
             for f in 0..mesh.num_face_indices.len() {
                 let end = next_face + mesh.num_face_indices[f] as usize;
 
@@ -39,6 +42,7 @@ impl Mesh {
                 next_face = end;
             }
 
+            //load vertices
             for vi in 0..mesh.positions.len() / 3 {
                 vertices.push(Vec3f::new(
                     mesh.positions[3 * vi],
@@ -47,13 +51,38 @@ impl Mesh {
                 ));
             }
 
+            // load uv
+            let mut uvs:Vec<Vec2f> = Vec::with_capacity(mesh.texcoords.len()/2);
+             for vi in 0..mesh.texcoords.len() / 2 {
+                uvs.push(Vec2f::new(
+                    mesh.texcoords[2 * vi],
+                    mesh.texcoords[2 * vi + 1],
+                ));
+            }
+
+            //load normals
+            let mut normals:Vec<Vec3f> = Vec::with_capacity(mesh.normals.len()/3);
+             for vi in 0..mesh.normals.len() / 3 {
+                normals.push(Vec3f::new(
+                    mesh.normals[3 * vi],
+                    mesh.normals[3 * vi + 1],
+                    mesh.normals[3 * vi + 2]
+                ));
+            }
+
+
+            assert!(normals.len()==vertices.len());
+            assert!(uvs.len()==vertices.len());
+
             println!("loading mesh took:{} sec", now.elapsed().as_secs());
-            return Mesh { indices, vertices };
+            return Mesh { indices, vertices ,uvs,normals};
         }
 
         Mesh {
             indices: vec![],
             vertices: vec![],
+            uvs:vec![],
+            normals:vec![]
         }
     }
 }

@@ -27,7 +27,7 @@ impl Mesh {
 
             println!("model[{}].faces #={}", i, mesh.num_face_indices.len());
             println!("model[{}].indices #={}", i, mesh.num_face_indices.len() * 3);
-            
+
             let mut vertices: Vec<Vec3f> = Vec::with_capacity(mesh.positions.len());
             let mut indices = Vec::with_capacity(mesh.num_face_indices.len() * 3);
 
@@ -52,8 +52,8 @@ impl Mesh {
             }
 
             // load uv
-            let mut uvs:Vec<Vec2f> = Vec::with_capacity(mesh.texcoords.len()/2);
-             for vi in 0..mesh.texcoords.len() / 2 {
+            let mut uvs: Vec<Vec2f> = Vec::with_capacity(mesh.texcoords.len() / 2);
+            for vi in 0..mesh.texcoords.len() / 2 {
                 uvs.push(Vec2f::new(
                     mesh.texcoords[2 * vi],
                     mesh.texcoords[2 * vi + 1],
@@ -61,28 +61,32 @@ impl Mesh {
             }
 
             //load normals
-            let mut normals:Vec<Vec3f> = Vec::with_capacity(mesh.normals.len()/3);
-             for vi in 0..mesh.normals.len() / 3 {
+            let mut normals: Vec<Vec3f> = Vec::with_capacity(mesh.normals.len() / 3);
+            for vi in 0..mesh.normals.len() / 3 {
                 normals.push(Vec3f::new(
                     mesh.normals[3 * vi],
                     mesh.normals[3 * vi + 1],
-                    mesh.normals[3 * vi + 2]
+                    mesh.normals[3 * vi + 2],
                 ));
             }
 
-
-            assert!(normals.len()==vertices.len());
-            assert!(uvs.len()==vertices.len());
+            assert!(normals.len() == vertices.len() || normals.len() == 0);
+            assert!(uvs.len() == vertices.len() || normals.len() == 0);
 
             println!("loading mesh took:{} sec", now.elapsed().as_secs());
-            return Mesh { indices, vertices ,uvs,normals};
+            return Mesh {
+                indices,
+                vertices,
+                uvs,
+                normals,
+            };
         }
 
         Mesh {
             indices: vec![],
             vertices: vec![],
-            uvs:vec![],
-            normals:vec![]
+            uvs: vec![],
+            normals: vec![],
         }
     }
 }

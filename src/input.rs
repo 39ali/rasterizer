@@ -22,14 +22,16 @@ impl Input {
     pub fn poll_events(&mut self, event_pump: &mut EventPump) {
         self.keys_pressed.clear();
         self.quit = false;
+        
         for event in event_pump.poll_iter() {
             if let Event::Quit { .. } = event {
                 self.quit = true;
             };
-            if let Event::KeyDown { scancode, .. } = event {
-                self.keys_pressed.insert(scancode.unwrap());
-            }
         }
+      for scancode in event_pump.keyboard_state().pressed_scancodes(){
+        self.keys_pressed.insert(scancode);
+      }
+
     }
     pub fn key_pressed(&self, key: Scancode) -> bool {
         self.keys_pressed.contains(&key)

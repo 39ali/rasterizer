@@ -1,7 +1,7 @@
 extern crate rand;
 extern crate rasterizer;
 
-use rasterizer::{entity::*, input::*, mesh::*, renderer::*};
+use rasterizer::{entity::*, input::*, mesh::*, renderer::*, texture::* , plane::*};
 
 use cgmath::*;
 use rand::Rng;
@@ -15,6 +15,8 @@ struct UserGame {
     delta: u128,
     theta_z: f32,
     entity: Entity,
+    texture: Texture,
+    random_colors: Vec<Color>,
 }
 
 impl UserGame {
@@ -29,9 +31,12 @@ impl UserGame {
 
         let renderer = Renderer::new(screen_width, screen_height, "raster");
         let input: Input = Input::default();
-        let mesh: Mesh = Mesh::new("C:/Dev/rasterizer/meshes/bunny.obj");
+        //"C:/Dev/rasterizer/
+        let mesh: Mesh = Mesh::new("meshes/cube/cube.obj");
+       // let mesh_plane = create_plane();
         let mut entity: Entity = Entity::new(mesh);
-        entity.transform.position.z += 3.0;
+        let texture = Texture::new("meshes/pepe.jpeg");
+        entity.transform.position.z += 1.5;
         entity.update_transform();
         UserGame {
             renderer,
@@ -39,6 +44,8 @@ impl UserGame {
             delta: 0,
             theta_z: 0.0,
             entity,
+            texture,
+            random_colors,
         }
     }
 
@@ -66,18 +73,22 @@ impl UserGame {
 
     fn update(&mut self, dt: f32) {
         let scale = dt / 60.;
-        self.theta_z += 0.3 * scale;
+        self.theta_z += 0.03 * scale;
 
-        self.entity.transform.rotation.y = self.theta_z;
-
-        self.entity.transform.position.x = (self.theta_z).cos() * 2.0;
+        if !self.input.key_pressed(Scancode::Space){
+         self.entity.transform.rotation.y = self.theta_z;
+        }
+        // self.entity.transform.position.x = (self.theta_z).cos() * 2.0;
         self.entity.update_transform();
     }
 
     fn render(&mut self) {
         self.renderer.clear();
 
-        self.renderer.draw_entity(&self.entity);
+        self.renderer
+            .draw_entity_with_texture(&self.entity, &self.texture);
+        // self.renderer
+        //    .draw_entity_with_color(&self.entity, &self.random_colors);
 
         self.renderer.present();
     }

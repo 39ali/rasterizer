@@ -1,7 +1,7 @@
 extern crate rand;
 extern crate rasterizer;
 
-use rasterizer::{entity::*, input::*, mesh::*, renderer::*, texture::* , plane::*};
+use rasterizer::{entity::*, input::*, mesh::*, plane::*, renderer::*, texture::*};
 
 use cgmath::*;
 use rand::Rng;
@@ -33,10 +33,10 @@ impl UserGame {
         let input: Input = Input::default();
         //"C:/Dev/rasterizer/
         let mesh: Mesh = Mesh::new("meshes/cube/cube.obj");
-       // let mesh_plane = create_plane();
+        let mesh_plane = create_plane();
         let mut entity: Entity = Entity::new(mesh);
         let texture = Texture::new("meshes/pepe.jpeg");
-        entity.transform.position.z += 1.5;
+        entity.transform.position.z += 2.0;
         entity.update_transform();
         UserGame {
             renderer,
@@ -73,10 +73,10 @@ impl UserGame {
 
     fn update(&mut self, dt: f32) {
         let scale = dt / 60.;
-        self.theta_z += 0.03 * scale;
 
-        if !self.input.key_pressed(Scancode::Space){
-         self.entity.transform.rotation.y = self.theta_z;
+        if self.input.key_pressed(Scancode::Space) {
+            self.theta_z -= 0.03 * scale;
+            self.entity.transform.rotation.y = self.theta_z;
         }
         // self.entity.transform.position.x = (self.theta_z).cos() * 2.0;
         self.entity.update_transform();
@@ -87,8 +87,8 @@ impl UserGame {
 
         self.renderer
             .draw_entity_with_texture(&self.entity, &self.texture);
-        // self.renderer
-        //    .draw_entity_with_color(&self.entity, &self.random_colors);
+        //   self.renderer
+        //     .draw_entity_with_color(&self.entity, &self.random_colors);
 
         self.renderer.present();
     }

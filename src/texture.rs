@@ -27,12 +27,11 @@ impl Texture {
     }
 
     pub fn get_pixel_uv(&self, u: f32, v: f32) -> [u8; 4] {
-  
         let w_half = (self.rgba.width()) as f32 - 1.0;
         let h_half = (self.rgba.height()) as f32 - 1.0;
 
-     //   let u = u.min(1.0);
-   //     let v = v.min(1.0);
+        //   let u = u.min(1.0);
+        //     let v = v.min(1.0);
 
         let x = w_half * u;
         let y = h_half * v;

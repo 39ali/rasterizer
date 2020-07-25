@@ -117,32 +117,37 @@ impl Renderer {
         let w = self.orient3d(&v0, &v1, &v2);
 
         /* triangle bounding box*/
-        let mut min_x = v0.x.min(v1.x).min(v2.x);
-        let mut min_y = v0.y.min(v1.y).min(v2.y);
-        let mut max_x = v0.x.max(v1.x).max(v2.x);
-        let mut max_y = v0.y.max(v1.y).max(v2.y);
+        let mut min_x = (v0.x as i32).min(v1.x as i32).min(v2.x as i32);
+        let mut min_y = (v0.y as i32).min(v1.y as i32).min(v2.y as i32);
+        let mut max_x = (v0.x as i32).max(v1.x as i32).max(v2.x as i32);
+        let mut max_y = (v0.y as i32).max(v1.y as i32).max(v2.y as i32);
 
         // clip to screen bounds
-        min_x = min_x.max(0.0);
-        min_y = min_y.max(0.0);
-        max_x = max_x.min((self.framebuffer.width - 1) as f32);
-        max_y = max_y.min((self.framebuffer.height - 1) as f32);
+        min_x = min_x.max(0);
+        min_y = min_y.max(0);
+        max_x = max_x.min((self.framebuffer.width - 1) as i32);
+        max_y = max_y.min((self.framebuffer.height - 1) as i32);
 
         //edges of the triangle
         let edge0 = v2 - v1;
         let edge1 = v0 - v2;
         let edge2 = v1 - v0;
 
-        let mut p: Vec2f = Vec2f::new(min_x, min_y);
-        while p.y <= max_y {
-            p.x = min_x;
-            while p.x <= max_x {
-                // calcualte the barycentric coordinates
-                let mut w0 = self.orient3d2(&v0, &v1, &p);
-                let mut w1 = self.orient3d2(&v1, &v2, &p);
-                let mut w2 = self.orient3d2(&v2, &v0, &p);
+        //   println!("v0:{:?} , v1:{:?} , v2:{:?} , min_x:{} , min_y:{} , max_x:{} , max_y:{}", v0,v1,v2,min_x,min_y,max_x,max_y);
 
-                let mut is_hit = false;
+        let mut p: Vec2f = Vec2f::new(min_x as f32, min_y as f32);
+
+        // we add 0.5 to center it in the middle of the pixel
+        p.y += 0.5;
+        while p.y <= max_y as f32 + 0.5 {
+            p.x = min_x as f32 + 0.5;
+            while p.x <= max_x as f32 + 0.5 {
+                // calcualte the barycentric coordinates
+                let mut w0 = self.orient3d2(&v1, &v2, &p);
+                let mut w1 = self.orient3d2(&v2, &v0, &p);
+                let mut w2 = self.orient3d2(&v0, &v1, &p);
+
+                let mut is_hit;
 
                 if w0 > 0.0 {
                     is_hit = true;
@@ -174,7 +179,7 @@ impl Renderer {
                     w1 /= w;
                     w2 /= w;
 
-                    let Z = 1.0 / (w0 * v0.z + w1 * v1.z + w2 * v2.z);
+                    let z_ = 1.0 / (w0 * v0.z + w1 * v1.z + w2 * v2.z);
 
                     self.framebuffer
                         .put_pixel(p.x as usize, p.y as usize, *color);
@@ -201,42 +206,39 @@ impl Renderer {
         let uv2 = Vec2f::new(uv2.x / v2.z, uv2.y / v2.z);
 
         // pre-compute 1 over z
-        let v0 = Vec3f::new(v0.x, v0.y, 1.0 / v0.z);
+        let v0 = Vec3f::new(v0.x, v0.y, 1. / v0.z);
         let v1 = Vec3f::new(v1.x, v1.y, 1.0 / v1.z);
         let v2 = Vec3f::new(v2.x, v2.y, 1.0 / v2.z);
         let w = self.orient3d(&v0, &v1, &v2);
 
-   //edges of the triangle
-   let edge0 = v2 - v1;
-   let edge1 = v0 - v2;
-   let edge2 = v1 - v0;
-
-
         /* triangle bounding box*/
-        let mut min_x = v0.x.min(v1.x).min(v2.x);
-        let mut min_y = v0.y.min(v1.y).min(v2.y);
-        let mut max_x = v0.x.max(v1.x).max(v2.x);
-        let mut max_y = v0.y.max(v1.y).max(v2.y);
-       
+        let mut min_x = (v0.x as i32).min(v1.x as i32).min(v2.x as i32);
+        let mut min_y = (v0.y as i32).min(v1.y as i32).min(v2.y as i32);
+        let mut max_x = (v0.x as i32).max(v1.x as i32).max(v2.x as i32);
+        let mut max_y = (v0.y as i32).max(v1.y as i32).max(v2.y as i32);
+
         // clip to screen bounds
-        min_x = min_x.max(0.0);
-        min_y = min_y.max(0.0);
-        max_x = max_x.min((self.framebuffer.width - 1) as f32);
-        max_y = max_y.min((self.framebuffer.height - 1) as f32);
+        min_x = min_x.max(0);
+        min_y = min_y.max(0);
+        max_x = max_x.min((self.framebuffer.width - 1) as i32);
+        max_y = max_y.min((self.framebuffer.height - 1) as i32);
 
+        //edges of the triangle
+        let edge0 = v2 - v1;
+        let edge1 = v0 - v2;
+        let edge2 = v1 - v0;
 
+        let mut p: Vec2f = Vec2f::new(min_x as f32, min_y as f32);
 
-        let mut p: Vec2f = Vec2f::new(min_x, min_y);
-     //   p.x+=0.5 ;
-       // p.y+=0.5;
-        while p.y <= max_y {
-            p.x = min_x;
-            while p.x <= max_x {
+        // we add 0.5 to center it in the middle of the pixel
+        p.y += 0.5;
+        while p.y <= max_y as f32 + 0.5 {
+            p.x = min_x as f32 + 0.5;
+            while p.x <= max_x as f32 + 0.5 {
                 // calcualte the barycentric coordinates
                 let mut w0 = self.orient3d2(&v1, &v2, &p);
                 let mut w1 = self.orient3d2(&v2, &v0, &p);
                 let mut w2 = self.orient3d2(&v0, &v1, &p);
-
 
                 let mut is_hit;
 
@@ -244,7 +246,6 @@ impl Renderer {
                     is_hit = true;
                 } else if w0 == 0.0 && (edge0.y == 0.0 && edge0.x > 0.0 || edge0.y > 0.0) {
                     is_hit = true;
-                    println!("3{}",is_hit);
                 } else {
                     is_hit = false;
                 }
@@ -253,7 +254,6 @@ impl Renderer {
                     is_hit &= true;
                 } else if w1 == 0.0 && (edge1.y == 0.0 && edge1.x > 0.0 || edge1.y > 0.0) {
                     is_hit &= true;
-                    println!("2{}",is_hit);
                 } else {
                     is_hit &= false;
                 }
@@ -262,7 +262,6 @@ impl Renderer {
                     is_hit &= true;
                 } else if w2 == 0.0 && (edge2.y == 0.0 && edge2.x > 0.0 || edge2.y > 0.0) {
                     is_hit &= true;
-                    println!("1{}",is_hit);
                 } else {
                     is_hit &= false;
                 }
@@ -278,12 +277,12 @@ impl Renderer {
                     let mut v =
                         (w0 as f32) * uv0.y + (w1 as f32) * uv1.y + (w2 as f32) * uv2.y as f32;
 
-                    let Z = 1.0 / (w0 * v0.z + w1 * v1.z + w2 * v2.z);
+                    let z_ = 1.0 / (w0 * v0.z + w1 * v1.z + w2 * v2.z);
 
-                   u *= Z;
-                    v *= Z;
+                    u *= z_;
+                    v *= z_;
                     // println!("u,v", u,v)
-                    let rgba_buf = tex.get_pixel_uv(u, 1.0-v);
+                    let rgba_buf = tex.get_pixel_uv(u, 1.0 - v);
                     let tex_color = Color::RGBA(rgba_buf[0], rgba_buf[1], rgba_buf[2], rgba_buf[3]);
 
                     self.framebuffer

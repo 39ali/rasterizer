@@ -8,8 +8,6 @@ use cgmath::*;
 use sdl2::{pixels::Color, render::Canvas, video::Window};
 
 extern crate rand;
-use rand::rngs::ThreadRng;
-use rand::Rng;
 
 pub struct Renderer {
     canvas: Canvas<Window>,
@@ -104,9 +102,6 @@ impl Renderer {
     fn orient3d2(&mut self, a: &Vec3f, b: &Vec3f, c: &Vec2f) -> f32 {
         (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)
     }
-    fn orient2d(&mut self, a: &Vec2i, b: &Vec2i, c: &Vec2i) -> i32 {
-        (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)
-    }
     // https://www.cs.bgu.ac.il/~graph161/wiki.files/09c-Rasterization.pdf
     // we are drawing in CW order
     pub fn draw_triangle_with_color(&mut self, v0: &Vec3f, v1: &Vec3f, v2: &Vec3f, color: &Color) {
@@ -114,7 +109,6 @@ impl Renderer {
         let v0 = Vec3f::new(v0.x, v0.y, 1. / v0.z);
         let v1 = Vec3f::new(v1.x, v1.y, 1.0 / v1.z);
         let v2 = Vec3f::new(v2.x, v2.y, 1.0 / v2.z);
-        let w = self.orient3d(&v0, &v1, &v2);
 
         /* triangle bounding box*/
         let mut min_x = (v0.x as i32).min(v1.x as i32).min(v2.x as i32);
@@ -143,9 +137,9 @@ impl Renderer {
             p.x = min_x as f32 + 0.5;
             while p.x <= max_x as f32 + 0.5 {
                 // calcualte the barycentric coordinates
-                let mut w0 = self.orient3d2(&v1, &v2, &p);
-                let mut w1 = self.orient3d2(&v2, &v0, &p);
-                let mut w2 = self.orient3d2(&v0, &v1, &p);
+                let  w0 = self.orient3d2(&v1, &v2, &p);
+                let  w1 = self.orient3d2(&v2, &v0, &p);
+                let  w2 = self.orient3d2(&v0, &v1, &p);
 
                 let mut is_hit;
 
@@ -175,12 +169,6 @@ impl Renderer {
 
                 if is_hit {
                     //calculate the barycentric coordinates
-                    w0 /= w;
-                    w1 /= w;
-                    w2 /= w;
-
-                    let z_ = 1.0 / (w0 * v0.z + w1 * v1.z + w2 * v2.z);
-
                     self.framebuffer
                         .put_pixel(p.x as usize, p.y as usize, *color);
                 }
@@ -362,9 +350,7 @@ impl Renderer {
             let v1 = transformed_vertices[*index2 as usize];
             let v2 = transformed_vertices[*index3 as usize];
 
-            let uv0 = entity.mesh.uvs[*index1 as usize];
-            let uv1 = entity.mesh.uvs[*index2 as usize];
-            let uv2 = entity.mesh.uvs[*index3 as usize];
+           
             self.draw_triangle_with_color(
                 &v0,
                 &v1,

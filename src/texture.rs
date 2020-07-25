@@ -1,6 +1,6 @@
 extern crate image;
 
-use image::{open, ImageBuffer, Rgba, RgbaImage};
+use image::{open, ImageBuffer, RgbaImage};
 
 pub struct Texture {
     rgba: RgbaImage,
